@@ -39,15 +39,15 @@ def show_2d(vertices, edges, size):
         p1 = vertices[edge[0]]
         p2 = vertices[edge[1]]
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]])
-    ax.set_xlim(0, size[0])
-    ax.set_ylim(0, size[1])
+    ax.set_xlim(-size[0] / 2, size[0] / 2)
+    ax.set_ylim(-size[1] / 2, size[1] / 2)
     plt.show()
     
 def get_extrinsic_matrix(camera_position, camera_orientation):
     original_position = np.array([0, 0, 1])
     direction_vector = -camera_position
     a = math.acos(np.dot(original_position, camera_orientation)/np.linalg.norm(original_position)/np.linalg.norm(camera_orientation))
-    cross_v = np.cross(original_position, camera_orientation)
+    cross_v = np.cross(camera_orientation, original_position)
     print(a/np.pi*180)
     print(cross_v)
     if np.linalg.norm(cross_v) == 0:
@@ -61,11 +61,14 @@ def get_extrinsic_matrix(camera_position, camera_orientation):
     _homo_matrix = np.eye(len(rotation_matrix) + 1)
     _homo_matrix[:len(rotation_matrix), :len(rotation_matrix)] = rotation_matrix
     rotation_matrix = _homo_matrix
+    print(rotation_matrix)
     
     translation_matrix = np.eye(4)
     translation_matrix[:3, -1] = direction_vector
+    print(translation_matrix)
     
     extrinsic_matrix = np.matmul(rotation_matrix, translation_matrix)
+    extrinsic_matrix = np.where(np.abs(extrinsic_matrix) < 1e-13, 0, extrinsic_matrix)
     
     return extrinsic_matrix
 
@@ -91,7 +94,6 @@ def get_intrinsic_matrix(focal_len, pixel_size):
     intrinsic_matrix = np.eye(3)
     for _i in range(len(pixel_size)):
         intrinsic_matrix[_i, _i] = focal_len * pixel_size[_i]
-        # intrinsic_matrix[_i, -1] = pixel_size[_i]
     
     return intrinsic_matrix
 
@@ -103,23 +105,26 @@ vertices = to_homogenous(vertices)
 _vertices = list()
 for _vertice in vertices:
     _vertice = np.matmul(extrinsic_matrix, _vertice)[:3]
+    _vertice = np.where(np.abs(_vertice) < 1e-13, 0, _vertice)
     _vertices.append(_vertice)
 vertices_3d = _vertices
 
+print(extrinsic_matrix)
+print(vertices_3d)
 show_3d(vertices_3d, edges)
 
+print(intrinsic_matrix)
 _vertices = list()
 for _vertice in vertices_3d:
     _vertice = np.matmul(intrinsic_matrix, _vertice)
-    dist = np.linalg.norm(_vertice)
+    _vertice = np.where(np.abs(_vertice) < 1e-13, 0, _vertice)
     if _vertice[-1] == 0:
-         _vertice[-1] = 1
-    else:
-        _vertice[-1] = -_vertice[-1] / dist
+         _vertice[-1] = 1e-13
     _vertice /= np.abs(_vertice[-1])
     _vertices.append(_vertice)
                 
 vertices_2d = _vertices
+print(vertices_2d)
 _vertices_2d = from_homogenous(vertices_2d)
 
 show_2d(_vertices_2d, edges, pixel_size)
