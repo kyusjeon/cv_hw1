@@ -44,10 +44,16 @@ def show_2d(vertices, edges, size):
     plt.show()
     
 def get_extrinsic_matrix(camera_position, camera_orientation):
-    original_position = np.array([0, 0, 0])
-    direction_vector = original_position - camera_position
-    a = np.dot(direction_vector, camera_orientation)/np.linalg.norm(direction_vector)/np.linalg.norm(camera_orientation)
-    x, y, z = np.cross(direction_vector, camera_orientation)/np.linalg.norm(direction_vector)/np.linalg.norm(camera_orientation)
+    original_position = np.array([0, 0, 1])
+    direction_vector = -camera_position
+    a = math.acos(np.dot(original_position, camera_orientation)/np.linalg.norm(original_position)/np.linalg.norm(camera_orientation))
+    cross_v = np.cross(original_position, camera_orientation)
+    print(a/np.pi*180)
+    print(cross_v)
+    if np.linalg.norm(cross_v) == 0:
+        x = y = z = 0
+    else:
+        x, y, z = cross_v / np.linalg.norm(cross_v)
     
     rotation_matrix = np.array([[math.cos(a) + x ** 2 * (1 - math.cos(a)), x * y * (1 - math.cos(a)) - z * math.sin(a), x * z * (1 - math.cos(a)) + y * math.sin(a)],
                                 [y * x * (1 - math.cos(a)) + z * math.sin(a), math.cos(a) + y ** 2 * (1 - math.cos(a)), y * z * (1 - math.cos(a)) - x * math.sin(a)],
@@ -74,9 +80,9 @@ def to_homogenous(points):
 def from_homogenous(points):
     homo_points = list()
     for point in points:
-        x, y, z = point
-        point = [x/z, y/z]
-        homo_points.append(point)
+        if np.abs(point[-1]) != 1.:
+            raise ValueError("make homogenous vector first")
+        homo_points.append(point[:-1])
     
     return homo_points
 
@@ -84,8 +90,8 @@ def get_intrinsic_matrix(focal_len, pixel_size):
     # princial point [0, 0]
     intrinsic_matrix = np.eye(3)
     for _i in range(len(pixel_size)):
-        intrinsic_matrix[_i, _i] = focal_len
-        intrinsic_matrix[_i, -1] = pixel_size[_i]
+        intrinsic_matrix[_i, _i] = focal_len * pixel_size[_i]
+        # intrinsic_matrix[_i, -1] = pixel_size[_i]
     
     return intrinsic_matrix
 
@@ -105,8 +111,15 @@ show_3d(vertices_3d, edges)
 _vertices = list()
 for _vertice in vertices_3d:
     _vertice = np.matmul(intrinsic_matrix, _vertice)
+    dist = np.linalg.norm(_vertice)
+    if _vertice[-1] == 0:
+         _vertice[-1] = 1
+    else:
+        _vertice[-1] = -_vertice[-1] / dist
+    _vertice /= np.abs(_vertice[-1])
     _vertices.append(_vertice)
+                
 vertices_2d = _vertices
-vertices_2d = from_homogenous(vertices_2d)
+_vertices_2d = from_homogenous(vertices_2d)
 
-show_2d(vertices_2d, edges, pixel_size)
+show_2d(_vertices_2d, edges, pixel_size)
