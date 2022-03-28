@@ -13,7 +13,7 @@ image_pad = np.zeros((pad + 1, pad + 1))
 
 def cal_norm(x, y, r):
     if r < (x ** 2 + y ** 2) ** (1/2):
-        raise ValueError("norm(x, y) over the radiatin")
+        raise ValueError("norm(x, y) over the radius")
     z = (r ** 2 - x ** 2 - y ** 2) ** (1/2)
     if z == 0:
         return np.array([x, y, 1]) / (x ** 2 + y ** 2) ** (1/2)
