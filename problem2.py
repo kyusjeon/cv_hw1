@@ -7,7 +7,7 @@ from mpl_toolkits.mplot3d import Axes3D
 cube_len = 2
 focal_len = 0.4
 pixel_size = [0.51, 0.49]
-camera_position = np.array([0, 0, -0.25])
+camera_position = np.array([0, 0, -2.5])
 camera_orientation = np.array([0, 0.1, 0])
 
 point_pos = cube_len / 2
@@ -39,12 +39,12 @@ def show_2d(vertices, edges, size):
         p1 = vertices[edge[0]]
         p2 = vertices[edge[1]]
         ax.plot([p1[0], p2[0]], [p1[1], p2[1]])
-    ax.set_xlim(-size[0] / 2, size[0] / 2)
-    ax.set_ylim(-size[1] / 2, size[1] / 2)
+    ax.set_xlim(0, size[0])
+    ax.set_ylim(0, size[1])
     plt.show()
     
 def get_extrinsic_matrix(camera_position, camera_orientation):
-    original_position = np.array([0, 0, 1])
+    original_position = np.array([0, 0, -1])
     direction_vector = -camera_position
     a = math.acos(np.dot(original_position, camera_orientation)/np.linalg.norm(original_position)/np.linalg.norm(camera_orientation))
     cross_v = np.cross(camera_orientation, original_position)
