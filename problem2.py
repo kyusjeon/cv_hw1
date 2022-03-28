@@ -112,7 +112,7 @@ for _vertice in vertices_3d:
     _vertice = np.matmul(intrinsic_matrix, _vertice)
     _vertice = np.where(np.abs(_vertice) < 1e-13, 0, _vertice)
     if _vertice[-1] == 0:
-         _vertice[-1] = 1e-13
+        _vertice[-1] = 1e-13
     _vertice /= np.abs(_vertice[-1])
     _vertices.append(_vertice)
                 
