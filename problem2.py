@@ -48,8 +48,6 @@ def get_extrinsic_matrix(camera_position, camera_orientation):
     direction_vector = -camera_position
     a = math.acos(np.dot(original_position, camera_orientation)/np.linalg.norm(original_position)/np.linalg.norm(camera_orientation))
     cross_v = np.cross(camera_orientation, original_position)
-    print(a/np.pi*180)
-    print(cross_v)
     if np.linalg.norm(cross_v) == 0:
         x = y = z = 0
     else:
@@ -61,11 +59,9 @@ def get_extrinsic_matrix(camera_position, camera_orientation):
     _homo_matrix = np.eye(len(rotation_matrix) + 1)
     _homo_matrix[:len(rotation_matrix), :len(rotation_matrix)] = rotation_matrix
     rotation_matrix = _homo_matrix
-    print(rotation_matrix)
     
     translation_matrix = np.eye(4)
     translation_matrix[:3, -1] = direction_vector
-    print(translation_matrix)
     
     extrinsic_matrix = np.matmul(rotation_matrix, translation_matrix)
     extrinsic_matrix = np.where(np.abs(extrinsic_matrix) < 1e-13, 0, extrinsic_matrix)
@@ -109,11 +105,8 @@ for _vertice in vertices:
     _vertices.append(_vertice)
 vertices_3d = _vertices
 
-print(extrinsic_matrix)
-print(vertices_3d)
 show_3d(vertices_3d, edges)
 
-print(intrinsic_matrix)
 _vertices = list()
 for _vertice in vertices_3d:
     _vertice = np.matmul(intrinsic_matrix, _vertice)
@@ -124,7 +117,6 @@ for _vertice in vertices_3d:
     _vertices.append(_vertice)
                 
 vertices_2d = _vertices
-print(vertices_2d)
 _vertices_2d = from_homogenous(vertices_2d)
 
 show_2d(_vertices_2d, edges, pixel_size)
