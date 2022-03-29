@@ -116,7 +116,7 @@ for _vertice in vertices_3d:
     _vertice /= np.abs(_vertice[-1])
     _vertices.append(_vertice)
                 
-vertices_2d = _vertices
+vertices_2d = _vertices 
 _vertices_2d = from_homogenous(vertices_2d)
 
-show_2d(_vertices_2d, edges, pixel_size)
+show_2d(np.asarray(_vertices_2d)*200, edges, np.asarray(pixel_size)*200)
